@@ -12,6 +12,6 @@ namespace prjRoyalTreeGUI.Data
         public string birthday { get; set; }
         public bool alive { get; set; }
         public FamilyMember<T> Parent { get; set; } //represents where on tree the node belongs
-        public List<FamilyMember<T>> Children { get; set; } //represents who belongs to current node
+        public List<FamilyMember<T>> Children { get; set; } = new List<FamilyMember<T>>(); //represents who belongs to current node
     }
 }
