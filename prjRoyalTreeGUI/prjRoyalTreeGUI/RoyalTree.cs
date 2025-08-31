@@ -46,11 +46,11 @@ namespace prjRoyalTreeGUI
 
             if (royalFamily?.Root != null)
             {
-                DrawTree(e.Graphics, royalFamily.Root, 20, 50, this.ClientSize.Width / 2);
+                drawTree(e.Graphics, royalFamily.Root, 20, 100, this.ClientSize.Width / 2);
             }
         }
 
-        private void DrawTree(Graphics g, FamilyMember<string> node, int y, int verticalSpacing, int x)
+        private void drawTree(Graphics g, FamilyMember<string> node, int y, int verticalSpacing, int x)
         {
             if (node == null)
             {
@@ -58,36 +58,44 @@ namespace prjRoyalTreeGUI
             }
 
             //visual displays of each node
-            int boxWidth = 120;
-            int boxHeight = 40;
+            int boxWidth = 160;
+            int boxHeight = 70;
             Font font = this.Font;
             Brush brush = Brushes.White;
             Pen pen = Pens.Black;
 
             //draw the node on the UI
             Rectangle rect = new Rectangle(x - boxWidth / 2, y, boxWidth, boxHeight);
-            g.FillRectangle(Brushes.LightBlue, rect);
+            Brush fillBrush = node.alive ? Brushes.LightGreen : Brushes.LightGray;
+            g.FillRectangle(fillBrush, rect);
             g.DrawRectangle(pen, rect);
 
-            //add names inside the box
+            //add memebr details inside the box
             StringFormat format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            g.DrawString(node.name, font, Brushes.Black, rect, format);
+            string displayText = $"{node.name}\n{node.birthday}\n{(node.alive ? "Alive" : "Deceased")}";
+            g.DrawString(displayText, font, Brushes.Black, rect, format);
+
 
             //if there are children, divide them horizontally
             if (node.Children != null && node.Children.Count > 0)
             {
-                int totalWidth = node.Children.Count * (boxWidth + 50);
-                int startX = x - totalWidth / 2 + boxWidth / 2;
+                int hSpacing = 40;
+                int totalWidth = spacingHelper(node, boxWidth, hSpacing) - hSpacing;
 
-                for (int i = 0; i < node.Children.Count; i++)
+                int startX = x - totalWidth / 2;
+
+                foreach (var child in node.Children)
                 {
-                    int childX = startX + i * (boxWidth + 50);
+                    int childWidth = spacingHelper(child, boxWidth, hSpacing);
+                    int childX = startX + childWidth / 2;
 
-                    //draw connecting line to child
+                    //draw line from parent to child
                     g.DrawLine(pen, x, y + boxHeight, childX, y + verticalSpacing);
 
-                    //recursively draw child
-                    DrawTree(g, node.Children[i], y + verticalSpacing, verticalSpacing, childX);
+                    //recurse
+                    drawTree(g, child, y + verticalSpacing, verticalSpacing, childX);
+
+                    startX += childWidth + hSpacing;
                 }
             }
         }
@@ -97,14 +105,13 @@ namespace prjRoyalTreeGUI
             if (node.Children == null || node.Children.Count == 0)
                 return boxWidth;
 
-            int total = 0;
+            int totalWidth = 0;
             foreach (var child in node.Children)
             {
-                total += GetSubtreeWidth(child, boxWidth, hSpacing) + hSpacing;
+                totalWidth += spacingHelper(child, boxWidth, hSpacing);
             }
 
-            return Math.Max(boxWidth, total - hSpacing);
+            return totalWidth + (node.Children.Count - 1) * hSpacing;
         }
-
     }
 }

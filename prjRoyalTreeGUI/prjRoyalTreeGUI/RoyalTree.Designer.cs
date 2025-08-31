@@ -30,11 +30,11 @@
         {
             SuspendLayout();
             // 
-            // Form1
+            // RoyalTree
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1179, 378);
             Name = "RoyalTree";
             Text = "Royal Tree GUI";
             ResumeLayout(false);
