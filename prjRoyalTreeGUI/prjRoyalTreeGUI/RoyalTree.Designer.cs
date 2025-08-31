@@ -28,18 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
+            btnBFS = new Button();
+            txtName = new TextBox();
             SuspendLayout();
+            // 
+            // btnBFS
+            // 
+            btnBFS.Location = new Point(91, 382);
+            btnBFS.Name = "btnBFS";
+            btnBFS.Size = new Size(90, 28);
+            btnBFS.TabIndex = 0;
+            btnBFS.Text = "BF Search";
+            btnBFS.UseVisualStyleBackColor = true;
+            btnBFS.Click += btnBFS_Click;
+            // 
+            // txtName
+            // 
+            txtName.Location = new Point(507, 296);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(120, 26);
+            txtName.TabIndex = 1;
             // 
             // RoyalTree
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1179, 378);
+            BackColor = SystemColors.ControlDarkDark;
+            ClientSize = new Size(1179, 472);
+            Controls.Add(txtName);
+            Controls.Add(btnBFS);
             Name = "RoyalTree";
             Text = "Royal Tree GUI";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private Button btnBFS;
+        private TextBox txtName;
     }
 }

@@ -1,4 +1,6 @@
 using prjRoyalTreeGUI.Data;
+using System.Drawing.Drawing2D;
+using System.Xml.Linq;
 
 namespace prjRoyalTreeGUI
 {
@@ -11,6 +13,10 @@ namespace prjRoyalTreeGUI
         }
 
         private FamilyTree<string> royalFamily;
+        //track whether a search is applied
+        private bool showSearchOrder = false;
+        private List<FamilyMember<string>> currentOrder = new List<FamilyMember<string>>();
+
 
         private void RoyalTree_Load(object sender, EventArgs e)
         {
@@ -28,14 +34,14 @@ namespace prjRoyalTreeGUI
 
             //4. setting up the second row of childrem to their parents
             var george = new FamilyMember<string> { name = "Prince George", birthday = "07/22/2013", alive = true, Parent = william };
-            var charlotte = new FamilyMember<string> { name = "Princess Charlotte", birthday = "05/02/2015", alive = true, Parent = william }; 
+            var charlotte = new FamilyMember<string> { name = "Princess Charlotte", birthday = "05/02/2015", alive = true, Parent = william };
             var louis = new FamilyMember<string> { name = "Prince Louis", birthday = "04/23/2018", alive = true, Parent = william };
-            william.Children.AddRange(new[] {george, charlotte, louis });
+            william.Children.AddRange(new[] { george, charlotte, louis });
 
             var archie = new FamilyMember<string> { name = "Prince Archie", birthday = "06/05/2019", alive = true, Parent = harry };
             var lilibet = new FamilyMember<string> { name = "Princess Lilibet", birthday = "04/06/2021", alive = true, Parent = harry };
 
-            harry.Children.AddRange(new[] {archie, lilibet});
+            harry.Children.AddRange(new[] { archie, lilibet });
 
             this.Refresh();
         }
@@ -46,11 +52,11 @@ namespace prjRoyalTreeGUI
 
             if (royalFamily?.Root != null)
             {
-                drawTree(e.Graphics, royalFamily.Root, 20, 100, this.ClientSize.Width / 2);
+                drawTree(e.Graphics, royalFamily.Root, 20, 100, this.ClientSize.Width / 2, showSearchOrder);
             }
         }
 
-        private void drawTree(Graphics g, FamilyMember<string> node, int y, int verticalSpacing, int x)
+        private void drawTree(Graphics g, FamilyMember<string> node, int y, int verticalSpacing, int x, bool showSearchOrder = false)
         {
             if (node == null)
             {
@@ -75,6 +81,11 @@ namespace prjRoyalTreeGUI
             string displayText = $"{node.name}\n{node.birthday}\n{(node.alive ? "Alive" : "Deceased")}";
             g.DrawString(displayText, font, Brushes.Black, rect, format);
 
+            //show arrows and order numbers if search applied
+            if (showSearchOrder && node.searchOrder > 0)
+            {
+                g.DrawString(node.searchOrder.ToString(), new Font("Arial", 12, FontStyle.Bold), Brushes.DarkBlue, rect.Right - 20, rect.Top + 5);
+            }
 
             //if there are children, divide them horizontally
             if (node.Children != null && node.Children.Count > 0)
@@ -89,8 +100,20 @@ namespace prjRoyalTreeGUI
                     int childWidth = spacingHelper(child, boxWidth, hSpacing);
                     int childX = startX + childWidth / 2;
 
-                    //draw line from parent to child
-                    g.DrawLine(pen, x, y + boxHeight, childX, y + verticalSpacing);
+                    if (showSearchOrder && node.searchOrder > 0 && child.searchOrder > 0)
+                    {
+                        using (Pen newPen = new Pen(Color.DarkBlue, 2))
+                        {
+                            AdjustableArrowCap bigArrow = new AdjustableArrowCap(4, 4);
+                            newPen.CustomEndCap = bigArrow;
+                            g.DrawLine(pen, x, y + boxHeight, childX, y + verticalSpacing);
+                        }
+                    }
+                    else
+                    {
+                        //draw line from parent to child
+                        g.DrawLine(pen, x, y + boxHeight, childX, y + verticalSpacing);
+                    }
 
                     //recurse
                     drawTree(g, child, y + verticalSpacing, verticalSpacing, childX);
@@ -112,6 +135,23 @@ namespace prjRoyalTreeGUI
             }
 
             return totalWidth + (node.Children.Count - 1) * hSpacing;
+        }
+
+        private void btnBFS_Click(object sender, EventArgs e)
+        {
+            string name = txtName.Text.ToString().Trim();
+            resetSearch(royalFamily.Root);
+            currentOrder = royalFamily.BreadthFirstSearch(name);
+            showSearchOrder = true;
+            this.Refresh();
+        }
+
+        private void resetSearch(FamilyMember<string> node)
+        {
+            if (node == null) return;
+            node.searchOrder = -1;
+            foreach (var child in node.Children)
+                resetSearch(child);
         }
     }
 }
